@@ -11,7 +11,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var mongoose = require('mongoose');
 var passwordHash = require('password-hash');
 var jwt    = require('jsonwebtoken');
-//var models = require('mongoose').models;
 var dbURL = 'mongodb://localhost:27017/sampleApp';
 
 
@@ -142,29 +141,7 @@ passport.use(new LocalStrategy(
     });
   }));
 
-/*passport.use(new LocalStrategy(
-  function(username, password, done) {
 
-    console.log("username",username);
-    console.log("password",password);
-
-
-      var userModel = new Usermodel({    
-        'oauthID': 3234234234234,
-        'name': 'abc',
-        'username':"abc",
-        'password':"password",
-        'created': new Date()});
-
-    
-
-    userModel.save(function (err, user) {
-      console.log("user>>>>>>>>>>>>>>>>>>>>>>>");
-      console.log(user);
-    });
-  }
-));
-*/
 
 
 
@@ -192,37 +169,7 @@ app.get('/auth/google',
   ] }
 ));
 
-/*app.get('/test',function(req,res){
 
-
-
-
-var obj = new Usermodel({    
-        'oauthID': 3234234234234,
-    'name': 'abc',
-    'username':'abc1',
-    'password':'password1'
-  });
-
- obj.save(function (err, user) {
-      console.log("user>>>>>>>>>>>>>>>>>>>>>>>");
-      console.log(user);
-      console.log(err);
-     
-      if(err){
-        return res.json(err);
-      }else{
-        return res.send("user inserted");
-      }
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      if (!user.verifyPassword(password)) { return done(null, false); }
-      return done(null, user);
-    });
-
-
-});
- */
 
 app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
@@ -246,6 +193,8 @@ app.post('/login',
   function(req, res) {
     
   });
+
+
 
 
 app.post('/signup',function(req,res){
