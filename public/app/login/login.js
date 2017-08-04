@@ -1,31 +1,28 @@
 'use strict';
 
-angular.module('myApp.signup', ['ngRoute'])
+angular.module('myApp.login', ['ngRoute'])
 
     .config(['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/signup', {
-            templateUrl: 'signup/signup.html',
-            controller: 'signupCtrl'
+        $routeProvider.when('/login', {
+            templateUrl: 'login/login.html',
+            controller: 'loginCtrl'
         });
     }])
 
-    .controller('signupCtrl', ['$scope', '$http', function($scope, $http) {
+    .controller('loginCtrl', ['$scope', '$http', function($scope, $http) {
 
         $scope.url = "http://localhost:3000";
-        $scope.error = false;
 
-        $scope.user ={};
-        $scope.signup = function() {
+
+        $scope.login = function() {
 
 
 
             $http({
                 method: 'POST',
-                url: $scope.url + "/signup",
+                url: $scope.url + "/login",
                 data: {
                     email: $scope.email,
-                    username: $scope.username,
-                    name: $scope.name,
                     password: $scope.password
                 },
                 headers: { 'Content-Type': 'application/json' }
@@ -41,7 +38,6 @@ angular.module('myApp.signup', ['ngRoute'])
 
 
         }
-
 
 
 

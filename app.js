@@ -138,7 +138,7 @@ passport.use(new LocalStrategy(
       if (!passwordHash.verify(password, user.password)) { 
         return cb(null, false);
       }
-      return res.json(user);
+      return cb(null,user);
     });
   }));
 

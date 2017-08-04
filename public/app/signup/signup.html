@@ -5,6 +5,12 @@
 		<input ng-model="email" placeholder="email" class="form-control" type="text" name="">
 	</div>
 	<div class="row" style="margin-top:10px;">
+		<input ng-model="username" placeholder="username" class="form-control" type="username" name="">
+	</div>
+	<div class="row" style="margin-top:10px;">
+		<input ng-model="name" placeholder="name" class="form-control" type="name" name="">
+	</div>
+	<div class="row" style="margin-top:10px;">
 		<input ng-model="password" placeholder="password" class="form-control" type="password" name="">
 	</div>
 	<div class="row" style="margin-top:10px;">
@@ -13,7 +19,7 @@
 	<!-- <div class="row" style="margin-top:10px;">
 		{{ 3+1 }}
 	</div> -->
-	<div class="alert alert-danger" role="alert" style="margin-top:10px;">{{  }}
+	<div ng-show="error" class="alert alert-danger" role="alert" style="margin-top:10px;">{{ error }}
 	</div>
 	</div>
 
