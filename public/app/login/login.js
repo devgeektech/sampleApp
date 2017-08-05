@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp.login', ['ngRoute'])
+angular.module('myApp.login', ['ngRoute','ngCookies'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/login', {
@@ -9,9 +9,14 @@ angular.module('myApp.login', ['ngRoute'])
         });
     }])
 
-    .controller('loginCtrl', ['$scope', '$http', function($scope, $http) {
+    .controller('loginCtrl', ['$scope', '$http','$cookies','$location', function($scope, $http, $cookies,$location) {
 
         $scope.url = "http://localhost:3000";
+
+
+        if($cookies.get('token')){
+            $location.path("/home");
+        }
 
 
 
@@ -31,7 +36,8 @@ angular.module('myApp.login', ['ngRoute'])
                 headers: {  "content-type": "application/json" }
 
             }).then(function successCallback(response) {
-                console.log(response.token);
+                $cookies.put('token', response.data.token);
+                $location.path("/home");
                 $scope.error = false;
 
             }, function errorCallback(response) {

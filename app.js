@@ -10,7 +10,7 @@ var GoogleStrategy = require('passport-google-oauth2').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var mongoose = require('mongoose');
 var passwordHash = require('password-hash');
-var jwt    = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 var dbURL = 'mongodb://localhost:27017/sampleApp';
 
 
@@ -27,10 +27,10 @@ var db = mongoose.connect(dbURL);
 // create a user model
 var User = new mongoose.Schema({
     oauthID: { type: Number, required: true },
-    name:  { type: String, required: true },
+    name: { type: String, required: true },
     username: { type: String, required: true },
-    email:{ type: String, required: true },
-    password:{ type: String, required: true },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
     created: { type: Date, required: true }
 });
 
@@ -47,8 +47,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -76,28 +75,28 @@ passport.use(new FacebookStrategy({
 
 
         Usermodel.find({ oauthID: profile.id }, function(err, user) {
-          console.log("user count");
-          console.log(user);
-          if(user.length==0){
-            var userData = new Usermodel({
-                  oauthID: profile.id,
-                  name: profile.displayName,
-                  created: new Date(),
-                  username:profile.displayName,
-                  password:""
+            console.log("user count");
+            console.log(user);
+            if (user.length == 0) {
+                var userData = new Usermodel({
+                    oauthID: profile.id,
+                    name: profile.displayName,
+                    created: new Date(),
+                    username: profile.displayName,
+                    password: ""
 
-              });
-              userData.save(function(err,user){
-                console.log(err);
-                  if(err){
-                    return cb(err);
-                  }else{
-                    return cb(user);
-                  }
-              });
-          }
+                });
+                userData.save(function(err, user) {
+                    console.log(err);
+                    if (err) {
+                        return cb(err);
+                    } else {
+                        return cb(user);
+                    }
+                });
+            }
             //return cb(err, user);
-          });
+        });
     }
 ));
 
@@ -105,65 +104,37 @@ passport.use(new FacebookStrategy({
 /*loging with google*/
 
 passport.use(new GoogleStrategy({
-    clientID:     '905259209972-ac949jbr58j4c9qkupqds6t5s6ng76k9.apps.googleusercontent.com',
-    clientSecret: 'nqNBJgKCBPibTAg090N1rXLp',
-    callbackURL: 'https://localhost:3000/auth/google/callback',
-    passReqToCallback   : true
-  },
-  function(request, accessToken, refreshToken, profile, done) {
-    console.log(request);
-    console.log(accessToken);
-    console.log(refreshToken);
-    console.log(profile);
+        clientID: '905259209972-ac949jbr58j4c9qkupqds6t5s6ng76k9.apps.googleusercontent.com',
+        clientSecret: 'nqNBJgKCBPibTAg090N1rXLp',
+        callbackURL: 'https://localhost:3000/auth/google/callback',
+        passReqToCallback: true
+    },
+    function(request, accessToken, refreshToken, profile, done) {
+        console.log(request);
+        console.log(accessToken);
+        console.log(refreshToken);
+        console.log(profile);
 
-    /*User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return done(err, user);
-    });*/
-  }
+
+    }
 ));
 
-  
-
-
-
-/*loging with Uername and password*/
-
-/*passport.use('login',new LocalStrategy(
-  function(email, password, cb) {
-    Usermodel.find({email:email}, function(err, user) {
-      console.log("user found ",user);
-      if (err) { return cb(err); }
-      if (!user) { cb(null, false); }
-      if (!passwordHash.verify(password, user.password)) { 
-        return cb(null, false);
-      }
-      return cb(null,user);
-    });
-  }));*/
-
-passport.use('login',new LocalStrategy(
-  function(username, password, cb) {
-   Usermodel.find({email:username}, function(err, user) {
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (!passwordHash.verify(password, user[0].password)) { return cb(null, false); }
-      return cb(null, user);
-    });
-  }));
 
 
 
 
-/*passport.use('login',new LocalStrategy(
-  function(username, password, cb) {
-    Usermodel.find({username:username}, function(err, user) {
-      console.log('user found', user);
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (false) { return cb(null, false); }
-      return cb(null, user);
-    });
-  }));*/
+
+passport.use('login', new LocalStrategy(
+    function(username, password, cb) {
+        Usermodel.findOne({ email: username }, function(err, user) {
+            if (err) { return cb(err); }
+            if (!user) { return cb(null, false); }
+            if (!passwordHash.verify(password, user.password)) { return cb(null, false); }
+            return cb(null, user);
+        });
+    }));
+
+
 
 
 
@@ -180,11 +151,12 @@ app.get('/auth/facebook',
 
 
 app.get('/auth/google',
-  passport.authenticate('google', { scope: [
-    'https://www.googleapis.com/auth/plus.login',
-    'https://www.googleapis.com/auth/plus.profile.emails.read'
-  ] }
-));
+    passport.authenticate('google', {
+        scope: [
+            'https://www.googleapis.com/auth/plus.login',
+            'https://www.googleapis.com/auth/plus.profile.emails.read'
+        ]
+    }));
 
 
 
@@ -197,69 +169,85 @@ app.get('/auth/facebook/callback',
 
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  function(req, res) {
-   console.log(res);
-   //res.send("google login callback")
-  });
+    passport.authenticate('google', { failureRedirect: '/' }),
+    function(req, res) {
+        console.log(res);
+        //res.send("google login callback")
+    });
 
 
 
-app.post('/login', 
-  passport.authenticate('login', { session:false }),
-  function(req, res) {
-    var user = req.user;
-    console.log("user ",user);
-    var body = {
-      id:req.user.id
-    }
-    const token = jwt.sign({ body },"secret");
-    res.json({token:token});
-  });
-
-
-
-
- /* app.post('/login',function(req,res){
-      console.log('dasasdfadfasdfsdfffffffffffffffffffffffffff');
-      res.json({asf:'sdfasdfs'});
-  });*/
+app.post('/login',
+    passport.authenticate('login', { session: false }),
+    function(req, res) {
+        var body = {
+            id: req.user._id
+        }
+        const token = jwt.sign({ body }, "secret");
+        res.json({ token: token });
+    });
 
 
 
 
-app.post('/signup',function(req,res){
-  console.log("email ",req.body.email);
-  console.log("password ",req.body.password);
-   Usermodel.find({ email: req.body.email }, function(err, user) {
-          console.log("user count");
-          console.log(user);
-          if(user.length>0){
+
+app.get('/userDetails', ensureToken, function(req, res) {
+
+
+
+    jwt.verify(req.token, 'secret', function(err, data) {
+        var userId = data.body.id;
+
+
+
+        if (err) {
+            res.sendStatus(403);
+        } else {
+            Usermodel.findOne({ _id: userId },{ name:1,username:1,email:1,_id:0 }, function(err, user) {
+             res.json(user);
+            });
+
+            
+        }
+    });
+});
+
+
+
+
+
+app.post('/signup', function(req, res) {
+    console.log("email ", req.body.email);
+    console.log("password ", req.body.password);
+    Usermodel.find({ email: req.body.email }, function(err, user) {
+        console.log("user count");
+        console.log(user);
+        if (user.length > 0) {
             //user already registered
-            return res.json({message:'user already registered'});
-          }else if(user.length==0){
+            return res.json({ message: 'user already registered' });
+        } else if (user.length == 0) {
             var userData = new Usermodel({
-                  oauthID: -1,
-                  name: req.body.name,
-                  created: new Date(),
-                  username:req.body.username,
-                  email:req.body.email,
-                  password : passwordHash.generate(req.body.password)
+                oauthID: -1,
+                name: req.body.name,
+                created: new Date(),
+                username: req.body.username,
+                email: req.body.email,
+                password: passwordHash.generate(req.body.password)
 
-              });
-              userData.save(function(err,user){
+            });
+            userData.save(function(err, user) {
                 console.log(err);
-                  if(err){
+                if (err) {
                     return res.json(err);
-                  }else{
-                    return res.json({message:'signup successful'});
-                  }
-              });
-          }
-            //return cb(err, user);
-          });
+                } else {
+                    return res.json({ message: 'signup successful' });
+                }
+            });
+        }
+        //return cb(err, user);
+    });
 
-  //res.json({despa:'cito'});
+    //res.json({despa:'cito'});
 });
 
 
@@ -297,6 +285,24 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
+
+
+
+
+
+
+function ensureToken(req, res, next) {
+    const bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader.split(" ");
+        const bearerToken = bearer[1];
+        req.token = bearerToken;
+        next();
+    } else {
+        res.sendStatus(403);
+    }
+
+}
 
 
 module.exports = app;
