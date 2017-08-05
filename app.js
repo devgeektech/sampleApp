@@ -116,12 +116,30 @@ passport.use(new GoogleStrategy({
     console.log(refreshToken);
     console.log(profile);
 
+    /*User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return done(err, user);
+    });*/
   }
 ));
 
   
 
 
+
+/*loging with Uername and password*/
+
+/*passport.use('login',new LocalStrategy(
+  function(email, password, cb) {
+    Usermodel.find({email:email}, function(err, user) {
+      console.log("user found ",user);
+      if (err) { return cb(err); }
+      if (!user) { cb(null, false); }
+      if (!passwordHash.verify(password, user.password)) { 
+        return cb(null, false);
+      }
+      return cb(null,user);
+    });
+  }));*/
 
 passport.use('login',new LocalStrategy(
   function(username, password, cb) {
@@ -132,6 +150,23 @@ passport.use('login',new LocalStrategy(
       return cb(null, user);
     });
   }));
+
+
+
+
+/*passport.use('login',new LocalStrategy(
+  function(username, password, cb) {
+    Usermodel.find({username:username}, function(err, user) {
+      console.log('user found', user);
+      if (err) { return cb(err); }
+      if (!user) { return cb(null, false); }
+      if (false) { return cb(null, false); }
+      return cb(null, user);
+    });
+  }));*/
+
+
+
 
 
 
@@ -182,6 +217,13 @@ app.post('/login',
     res.json({token:token});
   });
 
+
+
+
+ /* app.post('/login',function(req,res){
+      console.log('dasasdfadfasdfsdfffffffffffffffffffffffffff');
+      res.json({asf:'sdfasdfs'});
+  });*/
 
 
 

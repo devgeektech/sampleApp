@@ -31,7 +31,7 @@ angular.module('myApp.login', ['ngRoute'])
                 headers: {  "content-type": "application/json" }
 
             }).then(function successCallback(response) {
-                console.log(response);
+                console.log(response.token);
                 $scope.error = false;
 
             }, function errorCallback(response) {
