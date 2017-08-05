@@ -203,11 +203,11 @@ app.get('/userDetails', ensureToken, function(req, res) {
         if (err) {
             res.sendStatus(403);
         } else {
-            Usermodel.findOne({ _id: userId },{ name:1,username:1,email:1,_id:0 }, function(err, user) {
-             res.json(user);
+            Usermodel.findOne({ _id: userId }, { name: 1, username: 1, email: 1, _id: 0 }, function(err, user) {
+                res.json(user);
             });
 
-            
+
         }
     });
 });
@@ -240,7 +240,19 @@ app.post('/signup', function(req, res) {
                 if (err) {
                     return res.json(err);
                 } else {
-                    return res.json({ message: 'signup successful' });
+                    console.log(user);
+
+                    var body = {
+                        id: user._id
+                    }
+                    const token = jwt.sign({ body }, "secret");
+
+
+
+                    return res.json({
+                        message: 'signup successful',
+                        token: token
+                    });
                 }
             });
         }

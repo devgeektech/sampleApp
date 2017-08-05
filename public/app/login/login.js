@@ -42,7 +42,10 @@ angular.module('myApp.login', ['ngRoute','ngCookies'])
 
             }, function errorCallback(response) {
                 console.log(response);
-                $scope.error = response.message;
+                if(response.status==401){
+                    $scope.error = response.data;
+                }
+                
 
             });
 

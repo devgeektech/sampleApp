@@ -9,7 +9,7 @@ angular.module('myApp.signup', ['ngRoute'])
         });
     }])
 
-    .controller('signupCtrl', ['$scope', '$http', function($scope, $http) {
+    .controller('signupCtrl', ['$scope', '$http','$cookies','$location', function($scope, $http,$cookies,$location) {
 
         $scope.url = "http://localhost:3000";
         $scope.error = false;
@@ -31,11 +31,15 @@ angular.module('myApp.signup', ['ngRoute'])
                 headers: { 'Content-Type': 'application/json' }
             }).then(function successCallback(response) {
                 console.log(response);
-                $scope.error = false;
-
+                //$scope.error = false;
+                $scope.error = response.data.message;
+                if(response.data.token){
+                    $cookies.put('token',response.data.token)
+                    $location.path('/home')
+                }
             }, function errorCallback(response) {
                 console.log(response);
-                $scope.error = response.message;
+                $scope.error = response.data.message;
 
             });
 
