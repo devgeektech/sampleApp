@@ -64,7 +64,8 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: false, save
 passport.use(new FacebookStrategy({
         clientID: 844565622366271,
         clientSecret: 'e83ea04ee6e6187b1066cb8c156121d1',
-        callbackURL: "http://localhost:3000/auth/facebook/callback"
+        callbackURL: "http://localhost:3000/auth/facebook/callback",
+        profileFields: ['displayName','emails']
     },
     function(accessToken, refreshToken, profile, cb) {
 
@@ -75,15 +76,14 @@ passport.use(new FacebookStrategy({
 
 
         Usermodel.find({ oauthID: profile.id }, function(err, user) {
-            console.log("user count");
-            console.log(user);
             if (user.length == 0) {
                 var userData = new Usermodel({
                     oauthID: profile.id,
                     name: profile.displayName,
+                    email:profile.emails[0].value,
                     created: new Date(),
                     username: profile.displayName,
-                    password: ""
+                    password: "facebook"
 
                 });
                 userData.save(function(err, user) {
@@ -147,7 +147,10 @@ app.use('/home', home);
 app.use(passport.initialize());
 
 app.get('/auth/facebook',
-    passport.authenticate('facebook'));
+    passport.authenticate('facebook',{ scope: ['email']}),function(req,res){
+      console.log("request ",req);
+      console.log("response ",res);
+    });
 
 
 app.get('/auth/google',
@@ -160,12 +163,11 @@ app.get('/auth/google',
 
 
 
-app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', { failureRedirect: '/login' }),
-    function(req, res) {
-        // Successful authentication, redirect home. 
-        console.log(res);
-    });
+app.get('/auth/facebook/callback',function(req,res){
+console.log(req);
+console.log(res)
+
+});
 
 
 app.get('/auth/google/callback',
