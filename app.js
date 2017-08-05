@@ -55,7 +55,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
 
 
 
@@ -116,9 +116,6 @@ passport.use(new GoogleStrategy({
     console.log(refreshToken);
     console.log(profile);
 
-    /*User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return done(err, user);
-    });*/
   }
 ));
 
@@ -126,32 +123,17 @@ passport.use(new GoogleStrategy({
 
 
 
-/*loging with Uername and password*/
-
-passport.use(new LocalStrategy(
-  function(email, password, cb) {
-    Usermodel.find({email:email}, function(err, user) {
-      console.log("user found ",user);
+passport.use('login',new LocalStrategy(
+  function(username, password, cb) {
+   Usermodel.find({email:username}, function(err, user) {
       if (err) { return cb(err); }
-      if (!user) { cb(null, false); }
-      if (!passwordHash.verify(password, user.password)) { 
-        return cb(null, false);
-      }
-      return cb(null,user);
+      if (!user) { return cb(null, false); }
+      if (!passwordHash.verify(password, user[0].password)) { return cb(null, false); }
+      return cb(null, user);
     });
   }));
 
 
-
-
-
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function(user, done) {
-  done(null, user);
-});
 
 app.use('/', routes);
 app.use('/home', home);
@@ -189,10 +171,17 @@ app.get('/auth/google/callback',
 
 
 app.post('/login', 
-  passport.authenticate('local', { failureRedirect: '/login' }),
+  passport.authenticate('login', { session:false }),
   function(req, res) {
-    
+    var user = req.user;
+    console.log("user ",user);
+    var body = {
+      id:req.user.id
+    }
+    const token = jwt.sign({ body },"secret");
+    res.json({token:token});
   });
+
 
 
 

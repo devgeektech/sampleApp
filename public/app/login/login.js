@@ -14,18 +14,22 @@ angular.module('myApp.login', ['ngRoute'])
         $scope.url = "http://localhost:3000";
 
 
+
+
         $scope.login = function() {
 
+
+
+            var obj = {"username": $scope.email,"password": $scope.password};
 
 
             $http({
                 method: 'POST',
                 url: $scope.url + "/login",
-                data: {
-                    email: $scope.email,
-                    password: $scope.password
-                },
-                headers: { 'Content-Type': 'application/json' }
+                processData: false,
+                data: obj,
+                headers: {  "content-type": "application/json" }
+
             }).then(function successCallback(response) {
                 console.log(response);
                 $scope.error = false;
