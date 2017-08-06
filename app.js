@@ -59,9 +59,14 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: false, save
 
 
 
+
+
+
+
+
 /*loging with facebook*/
 
-passport.use(new FacebookStrategy({
+passport.use('facebook',new FacebookStrategy({
         clientID: 844565622366271,
         clientSecret: 'e83ea04ee6e6187b1066cb8c156121d1',
         callbackURL: "http://localhost:3000/auth/facebook/callback",
@@ -69,14 +74,11 @@ passport.use(new FacebookStrategy({
     },
     function(accessToken, refreshToken, profile, cb) {
 
-        console.log("accessToken ", accessToken);
-        console.log("refreshToken ", refreshToken);
-        console.log("profile ", profile);
-        console.log("profile.id ", profile.id);
 
+        Usermodel.findOne({ oauthID: profile.id }, function(err, user) {
 
-        Usermodel.find({ oauthID: profile.id }, function(err, user) {
-            if (user.length == 0) {
+            console.log("user found ",user);
+            if (!user) {
                 var userData = new Usermodel({
                     oauthID: profile.id,
                     name: profile.displayName,
@@ -89,13 +91,17 @@ passport.use(new FacebookStrategy({
                 userData.save(function(err, user) {
                     console.log(err);
                     if (err) {
-                        return cb(err);
+                         console.log("err>>> ",err);
+                        return cb(null,err);
                     } else {
-                        return cb(user);
+                       console.log("user saved>>> ",user);
+                        return cb(null,user);
                     }
                 });
+            }else{
+                console.log("user already there ",user);
+                return cb(null,user)
             }
-            //return cb(err, user);
         });
     }
 ));
@@ -103,7 +109,7 @@ passport.use(new FacebookStrategy({
 
 /*loging with google*/
 
-passport.use(new GoogleStrategy({
+passport.use('google',new GoogleStrategy({
         clientID: '905259209972-ac949jbr58j4c9qkupqds6t5s6ng76k9.apps.googleusercontent.com',
         clientSecret: 'nqNBJgKCBPibTAg090N1rXLp',
         callbackURL: 'https://localhost:3000/auth/google/callback',
@@ -114,6 +120,9 @@ passport.use(new GoogleStrategy({
         console.log(accessToken);
         console.log(refreshToken);
         console.log(profile);
+
+
+
 
 
     }
@@ -147,10 +156,7 @@ app.use('/home', home);
 app.use(passport.initialize());
 
 app.get('/auth/facebook',
-    passport.authenticate('facebook',{ scope: ['email']}),function(req,res){
-      console.log("request ",req);
-      console.log("response ",res);
-    });
+    passport.authenticate('facebook',{ scope: ['email']}));
 
 
 app.get('/auth/google',
@@ -163,18 +169,34 @@ app.get('/auth/google',
 
 
 
-app.get('/auth/facebook/callback',function(req,res){
-console.log(req);
-console.log(res)
 
-});
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { session: false, failureRedirect: "/app/#!/login" }),
+  function(req, res) {
+      var body = {
+            id: req.user._id
+        }
+
+        const token = jwt.sign({ body }, "secret");
+        res.redirect(`http://localhost:3000/app/#!/redirect?token=`+token);
+  }
+);
 
 
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     function(req, res) {
-        console.log(res);
-        //res.send("google login callback")
+
+        console.log('req>>>>>>>> ',req);
+        console.log('res>>>>>>>> ',res);
+
+       /*  var body = {
+            id: req.user._id
+        }*/
+
+       // const token = jwt.sign({ body }, "secret");
+       // res.redirect(`http://localhost:3000/app/#!/redirect?token=`+token);
+       
     });
 
 
@@ -195,9 +217,10 @@ app.post('/login',
 
 app.get('/userDetails', ensureToken, function(req, res) {
 
-
+console.log("req.token ",req.token);
 
     jwt.verify(req.token, 'secret', function(err, data) {
+        console.log("userdata>>>><>>>>><>>>>> ",data);
         var userId = data.body.id;
 
 
