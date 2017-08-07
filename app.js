@@ -109,24 +109,56 @@ passport.use('facebook',new FacebookStrategy({
 
 /*loging with google*/
 
+
 passport.use('google',new GoogleStrategy({
-        clientID: '905259209972-ac949jbr58j4c9qkupqds6t5s6ng76k9.apps.googleusercontent.com',
-        clientSecret: 'nqNBJgKCBPibTAg090N1rXLp',
-        callbackURL: 'https://localhost:3000/auth/google/callback',
-        passReqToCallback: true
-    },
-    function(request, accessToken, refreshToken, profile, done) {
-        console.log(request);
-        console.log(accessToken);
-        console.log(refreshToken);
-        console.log(profile);
+    clientID:     "905259209972-ac949jbr58j4c9qkupqds6t5s6ng76k9.apps.googleusercontent.com",
+    clientSecret: "nqNBJgKCBPibTAg090N1rXLp",
+    callbackURL: "http://localhost:3000/auth/google/callback",
+    passReqToCallback   : false
+  },
+  function(request, accessToken, refreshToken, profile, done) {
+        //console.log(request);
+        //console.log(accessToken);
+        //console.log(refreshToken);
+        //profile.displayName
+        console.log(">>>>>>>>>>>>>>>>>>>>>>    .. ",profile);
+
+        //done(null,profile);
+        Usermodel.findOne({ oauthID: profile.id }, function(err, user) {
+
+            console.log("user found ",user);
+            if (!user) {
+                var userData = new Usermodel({
+                    oauthID: profile.id,
+                    name: profile.displayName,
+                    email:profile.emails[0].value,
+                    created: new Date(),
+                    username: profile.displayName,
+                    password: "google"
+
+                });
+                userData.save(function(err, user) {
+                    console.log(err);
+                    if (err) {
+                         console.log("err>>> ",err);
+                        return done(null,err);
+                    } else {
+                       console.log("user saved>>> ",user);
+                        return done(null,user);
+                    }
+                });
+            }else{
+                console.log("user already there ",user);
+                return done(null,user)
+            }
+        });
 
 
 
-
-
-    }
+  }
 ));
+
+
 
 
 
@@ -159,13 +191,8 @@ app.get('/auth/facebook',
     passport.authenticate('facebook',{ scope: ['email']}));
 
 
-app.get('/auth/google',
-    passport.authenticate('google', {
-        scope: [
-            'https://www.googleapis.com/auth/plus.login',
-            'https://www.googleapis.com/auth/plus.profile.emails.read'
-        ]
-    }));
+
+
 
 
 
@@ -183,23 +210,24 @@ app.get('/auth/facebook/callback',
 );
 
 
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    function(req, res) {
-
-        console.log('req>>>>>>>> ',req);
-        console.log('res>>>>>>>> ',res);
-
-       /*  var body = {
+app.get('/auth/google',
+  passport.authenticate('google', { scope: 
+    [ 'https://www.googleapis.com/auth/plus.login',
+    , 'https://www.googleapis.com/auth/plus.profile.emails.read' ] }
+));
+ 
+app.get( '/auth/google/callback', 
+    passport.authenticate( 'google', {
+        failureRedirect: '/app/#!/login',
+        session: false
+}), function(req, res) {
+      var body = {
             id: req.user._id
-        }*/
+        }
 
-       // const token = jwt.sign({ body }, "secret");
-       // res.redirect(`http://localhost:3000/app/#!/redirect?token=`+token);
-       
-    });
-
-
+        const token = jwt.sign({ body }, "secret");
+        res.redirect(`http://localhost:3000/app/#!/redirect?token=`+token);
+  });
 
 app.post('/login',
     passport.authenticate('login', { session: false }),
